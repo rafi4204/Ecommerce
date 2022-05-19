@@ -39,8 +39,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "productKeys")
 data class ProductKeys(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int,
-    val after: Int?,
-    val before: Int?
+    @PrimaryKey
+    val repoId: Int,
+    val prevKey: Int?,
+    val nextKey: Int?
 )

@@ -13,7 +13,7 @@ interface ProductKeysDao {
     @Insert(onConflict = REPLACE)
     suspend fun saveRedditKeys(redditKey: List<ProductKeys>)
 
-    @Query("SELECT * FROM productKeys WHERE id = :id")
+    @Query("SELECT * FROM productKeys WHERE repoId = :id")
     suspend fun remoteKeysDoggoId(id: String): ProductKeys?
 
     @Query("DELETE FROM productKeys")

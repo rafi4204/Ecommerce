@@ -51,7 +51,7 @@ import javax.inject.Inject
 
 @Database(
     entities = [Product::class, ProductKeys::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(RateConverter::class)
@@ -63,7 +63,7 @@ abstract class ProductDatabase  :
     companion object {
         fun create(context: Context): ProductDatabase {
             val databaseBuilder =
-                Room.databaseBuilder(context, ProductDatabase::class.java, "product.db")
+                Room.databaseBuilder(context, ProductDatabase::class.java, "product.db").fallbackToDestructiveMigration()
             return databaseBuilder.build()
         }
     }

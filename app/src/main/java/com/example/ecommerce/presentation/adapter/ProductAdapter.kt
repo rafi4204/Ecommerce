@@ -31,11 +31,13 @@ class ProductAdapter(val context : Context) :
     class RedditViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val text: TextView = itemView.findViewById(R.id.tv)
         private val imageView: ImageView = itemView.findViewById(R.id.iv)
+        private val ratingTv: TextView = itemView.findViewById(R.id.rating)
 
 
         fun bindPost(product: Product,context: Context) {
             with(product) {
-                text.text = product.description
+                text.text = product.title
+                ratingTv.text = product.rating.rate.toString()
                 Glide.with(context)
                     .load(product.image)
                     .diskCacheStrategy(DiskCacheStrategy.DATA)

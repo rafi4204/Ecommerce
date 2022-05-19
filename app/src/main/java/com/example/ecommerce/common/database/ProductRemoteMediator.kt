@@ -41,6 +41,7 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.example.ecommerce.common.network.ApiService
 import com.example.ecommerce.common.utils.AppHelper.DEFAULT_PAGE_INDEX
+import com.example.ecommerce.common.utils.AppHelper.DEFAULT_PAGE_SIZE
 import com.example.ecommerce.data.Product
 import com.example.ecommerce.data.ProductKeys
 import retrofit2.HttpException
@@ -67,7 +68,7 @@ class ProductRemoteMediator(
         }
 
         try {
-            val response = apiService.getProducts()
+            val response = apiService.getProducts(page)
             val isEndOfList = response.isEmpty()
             appDatabase.withTransaction {
                 // clear all tables in the database
@@ -75,10 +76,10 @@ class ProductRemoteMediator(
                     appDatabase.productKeysDao().clearRemoteKeys()
                     appDatabase.productDao().clearAllProduct()
                 }
-                val prevKey = if (page == DEFAULT_PAGE_INDEX) null else page - 1
-                val nextKey = if (isEndOfList) null else page + 1
+                val prevKey = if (state.config.pageSize == DEFAULT_PAGE_SIZE) null else page - DEFAULT_PAGE_SIZE
+                val nextKey = if (isEndOfList) null else page + DEFAULT_PAGE_SIZE
                 val keys = response.map {
-                    ProductKeys(id = it.id, before = prevKey, after = nextKey)
+                    ProductKeys(repoId = it.id, prevKey = prevKey, nextKey = nextKey)
                 }
                 appDatabase.productKeysDao().saveRedditKeys(keys)
                 appDatabase.productDao().savePosts(response)
@@ -98,14 +99,15 @@ class ProductRemoteMediator(
         return when (loadType) {
             LoadType.REFRESH -> {
                 val remoteKeys = getClosestRemoteKey(state)
-                remoteKeys?.after?.minus(1) ?: DEFAULT_PAGE_INDEX
+                remoteKeys?.nextKey?.minus(DEFAULT_PAGE_SIZE) ?: DEFAULT_PAGE_SIZE
             }
             LoadType.APPEND -> {
                 val remoteKeys = getLastRemoteKey(state)
                 if (remoteKeys == null)
-                    DEFAULT_PAGE_INDEX
-                else remoteKeys.after
-                    ?: throw InvalidObjectException("Remote key should not be null for $loadType")
+                    DEFAULT_PAGE_SIZE
+                else if(remoteKeys.nextKey == null)
+                    throw InvalidObjectException("Remote key should not be null for $loadType")
+                else remoteKeys.nextKey
             }
             LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
         }
