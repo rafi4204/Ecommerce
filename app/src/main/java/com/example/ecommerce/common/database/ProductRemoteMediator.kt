@@ -56,7 +56,7 @@ class ProductRemoteMediator(
     override suspend fun load(
         loadType: LoadType, state: PagingState<Int, Product>
     ): MediatorResult {
-
+// nothing
         val pageKeyData = getKeyPageData(loadType, state)
         val page = when (pageKeyData) {
             is MediatorResult.Success -> {
